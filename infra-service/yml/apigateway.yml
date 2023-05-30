@@ -1,0 +1,47 @@
+ApiGateway:
+  Type: AWS::ApiGateway::RestApi
+  Properties:
+    Name: "Pl-cargo"
+    Description: API Gateway for Pl-cargo
+    EndpointConfiguration:
+      Types:
+        - REGIONAL
+
+ApiGatewayResponseDefault4XX:
+  Type: 'AWS::ApiGateway::GatewayResponse'
+  Properties:
+    ResponseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+      gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+    ResponseType: DEFAULT_4XX
+    RestApiId:
+      Ref: 'ApiGateway'
+
+ApiGatewayResponseDefault5XX:
+  Type: 'AWS::ApiGateway::GatewayResponse'
+  Properties:
+    ResponseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+      gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+    ResponseType: DEFAULT_5XX
+    RestApiId:
+      Ref: 'ApiGateway'
+
+cargoJWTLambdaAuthorizer:
+  Type: AWS::ApiGateway::Authorizer
+  Properties:
+    IdentitySource: method.request.header.Authorization
+    Name: cargoJWTLambdaAuthorizer 
+    RestApiId:
+      Ref: ApiGateway
+    AuthorizerUri:
+      Fn::Join:
+      - ''
+      - - 'arn:'
+        - Ref: AWS::Partition
+        - ":apigateway:"
+        - Ref: AWS::Region
+        - ":lambda:path/2015-03-31/functions/"
+        - arn:aws:lambda:${self:provider.region}:${self:custom.account}:function:cargoJWTLambdaAuthorizer
+        - "/invocations"
+    Type: TOKEN

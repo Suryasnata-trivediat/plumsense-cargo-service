@@ -1,0 +1,22 @@
+functions:  
+  getTrackers:
+    handler: src/lambda/getTrackers.handler
+    role: getTrackersRole
+    name: getTrackers
+    description: Plumsense cargo - get trackers.
+    layers:
+      - arn:aws:lambda:${self:provider.region}:${self:custom.account}:layer:mysqlLayer:1
+    package:
+      individually: true
+      patterns:
+        - '!./**'
+        - 'src/core/db.js'
+        - 'src/lambda/getTrackers.js'
+    events:
+      - http: 
+          path: trackers
+          method: get
+          authorizer:
+            type: TOKEN
+            authorizerId: ${self:custom.JWTAuthorizerID}
+          cors: true

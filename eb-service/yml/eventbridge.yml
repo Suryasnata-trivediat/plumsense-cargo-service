@@ -1,0 +1,4 @@
+APIEventbus: 
+  Type: AWS::Events::EventBus
+  Properties: 
+    Name: '${self:custom.servicename}-${self:provider.stage}-APIEventbus'

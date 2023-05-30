@@ -1,0 +1,44 @@
+AWSAccount: ${cf:common-service-${self:provider.stage}.AWSAccount}
+ApiGatewayAuthorizerId: ${cf:common-service-${self:provider.stage}.ApiGatewayAuthorizerId}
+ApiGatewayId: ${cf:common-service-${self:provider.stage}.ApiGatewayId}
+ApiGatewayRootResourceId: ${cf:common-service-${self:provider.stage}.ApiGatewayRootResourceId}
+VPCSecurityGroupId: ${cf:common-service-${self:provider.stage}.VPCSecurityGroupId}
+VPCSubnetId1: ${cf:common-service-${self:provider.stage}.VPCSubnetId1}
+VPCSubnetId2: ${cf:common-service-${self:provider.stage}.VPCSubnetId2}
+ServerlessDeploymentBucketName: ${cf:common-service-${self:provider.stage}.ServerlessDeploymentBucketName}
+CargoService:
+  name: Pl-cargo-service
+  lambdaNamePrefix: '${file(./yml/referenceVariable.yml):CargoService.name}-${self:provider.stage}-'
+  lambdaARNBase: 'arn:aws:lambda:${self:provider.region}:${self:custom.account}:function:${file(./yml/referenceVariable.yml):CargoService.lambdaNamePrefix}'
+######################################### BASE ARNs #########################################
+SSMBaseARN: arn:aws:ssm:${self:provider.region}:${self:custom.account}:parameter
+UserPoolBaseARN: arn:aws:cognito-idp:${self:provider.region}:${self:custom.account}:userpool/
+EventbusBaseARN: arn:aws:events:${self:provider.region}:${self:custom.account}:event-bus/
+######################################### SSM #########################################
+HostParameterRef:
+  Name: ${cf:common-service-${self:provider.stage}.HostParameterName}
+  ARN: ${file(./yml/referenceVariable.yml):SSMBaseARN}${cf:common-service-${self:provider.stage}.HostParameterName}
+
+UserParameterRef:
+  Name: ${cf:common-service-${self:provider.stage}.UserParameterName}
+  ARN: ${file(./yml/referenceVariable.yml):SSMBaseARN}${cf:common-service-${self:provider.stage}.UserParameterName}
+
+DBnameParameterRef:
+  Name: ${cf:common-service-${self:provider.stage}.DBnameParameterName}
+  ARN: ${file(./yml/referenceVariable.yml):SSMBaseARN}${cf:common-service-${self:provider.stage}.DBnameParameterName}
+
+PasswordParameterRef:
+  Name: ${cf:common-service-${self:provider.stage}.PasswordParameterName}
+  ARN: ${file(./yml/referenceVariable.yml):SSMBaseARN}${cf:common-service-${self:provider.stage}.PasswordParameterName}
+
+PortParameterRef:
+  Name: ${cf:common-service-${self:provider.stage}.PortParameterName}
+  ARN: ${file(./yml/referenceVariable.yml):SSMBaseARN}${cf:common-service-${self:provider.stage}.PortParameterName}
+######################################### Event bridge #########################################
+APIEventbusRef:
+  Name: ${cf:common-service-${self:provider.stage}.EventBus}
+  ARN: ${file(./yml/referenceVariable.yml):EventbusBaseARN}${cf:common-service-${self:provider.stage}.EventBus}
+######################################### Cognito #########################################
+UserPoolRef:
+  ID: ${cf:common-service-${self:provider.stage}.UserPool}
+  ARN: ${file(./yml/referenceVariable.yml):UserPoolBaseARN}${cf:common-service-${self:provider.stage}.UserPool}

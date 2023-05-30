@@ -1,0 +1,60 @@
+service: Pl-cargo-service
+frameworkVersion: '3'
+
+custom:
+  account: ${file(./yml/referenceVariable.yml):AWSAccount}
+  servicename: ${self:service}
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: '${opt:stage, self:provider.stage}'
+  region: '${opt:region, self:provider.region}'
+  logRetentionInDays: 3
+  endpointType: REGIONAL
+  vpc: 
+    securityGroupIds:
+      - ${file(./yml/referenceVariable.yml):VPCSecurityGroupId}
+    subnetIds:
+      - ${file(./yml/referenceVariable.yml):VPCSubnetId1}
+      - ${file(./yml/referenceVariable.yml):VPCSubnetId2}
+  environment:
+    REGION: ${self:provider.region}
+    SSM_USERNAME_PATH: ${file(./yml/referenceVariable.yml):UserParameterRef.Name}
+    SSM_PASSWORD_PATH: ${file(./yml/referenceVariable.yml):PasswordParameterRef.Name}
+    SSM_PORT_PATH: ${file(./yml/referenceVariable.yml):PortParameterRef.Name}
+    SSM_HOST_PATH: ${file(./yml/referenceVariable.yml):HostParameterRef.Name}
+    SSM_DBNAME_PATH: ${file(./yml/referenceVariable.yml):DBnameParameterRef.Name}
+  deploymentBucket:
+    name: ${file(./yml/referenceVariable.yml):ServerlessDeploymentBucketName}
+
+functions: ${file(./yml/functions.yml):functions}
+
+resources:
+  Resources:
+    ApiGateway: ${file(./yml/apigateway.yml):ApiGateway}
+    ApiGatewayResponseDefault4XX: ${file(./yml/apigateway.yml):ApiGatewayResponseDefault4XX}
+    ApiGatewayResponseDefault5XX: ${file(./yml/apigateway.yml):ApiGatewayResponseDefault5XX}
+    cargoJWTLambdaAuthorizer: ${file(./yml/apigateway.yml):cargoJWTLambdaAuthorizer}
+    cargoJWTLambdaAuthorizerRole: ${file(./yml/roles.yml):cargoJWTLambdaAuthorizerRole}
+
+  Outputs:
+    CargoApiGatewayId:
+      Description: "ApiGateway for the output from the common"
+      Value: 
+        Ref: ApiGateway
+    CargoApiGatewayRootResourceId:
+      Value:
+        'Fn::GetAtt':
+        - ApiGateway
+        - RootResourceId
+      Export:
+        Name: CargoApiGatewayRootResourceId
+    CargoApiGatewayAuthorizerId:
+      Value:
+        'Fn::GetAtt':
+        - cargoJWTLambdaAuthorizer
+        - AuthorizerId
+    EventBus:
+      Description: "Event bus"
+      Value: '${file(./yml/referenceVariable.yml):APIEventbusRef.Name}'

@@ -1,0 +1,20 @@
+service: Pl-cargo-eb-service
+frameworkVersion: '3'
+
+custom:
+  account: ${file(./yml/referenceVariable.yml):AWSAccount}
+  servicename: ${self:service}
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: '${opt:stage, self:provider.stage}'
+  region: '${opt:region, self:provider.region}'
+  logRetentionInDays: 3
+  endpointType: REGIONAL
+  deploymentBucket:
+    name: ${file(./yml/referenceVariable.yml):ServerlessDeploymentBucketName}
+
+resources:
+  Resources:
+    APIEventbus: ${file(./yml/eventbridge.yml):APIEventbus}

@@ -1,0 +1,44 @@
+service: Pl-cargo-common-service
+frameworkVersion: '3'
+
+custom:
+  account: ${file(./yml/referenceVariable.yml):AWSAccount}
+  servicename: ${self:service}
+  JWTAuthorizerID: ${file(./yml/referenceVariable.yml):ApiGatewayAuthorizerId}
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: '${opt:stage, self:provider.stage}'
+  region: '${opt:region, self:provider.region}'
+  logRetentionInDays: 3
+  endpointType: REGIONAL
+  apiGateway:
+    restApiId: ${file(./yml/referenceVariable.yml):ApiGatewayId}
+    restApiRootResourceId: ${file(./yml/referenceVariable.yml):ApiGatewayRootResourceId}
+  vpc: 
+    securityGroupIds:
+      - ${file(./yml/referenceVariable.yml):VPCSecurityGroupId}
+    subnetIds:
+      - ${file(./yml/referenceVariable.yml):VPCSubnetId1}
+      - ${file(./yml/referenceVariable.yml):VPCSubnetId2}
+  environment:
+    REGION: ${self:provider.region}
+    SSM_USERNAME_PATH: ${file(./yml/referenceVariable.yml):UserParameterRef.Name}
+    SSM_PASSWORD_PATH: ${file(./yml/referenceVariable.yml):PasswordParameterRef.Name}
+    SSM_PORT_PATH: ${file(./yml/referenceVariable.yml):PortParameterRef.Name}
+    SSM_HOST_PATH: ${file(./yml/referenceVariable.yml):HostParameterRef.Name}
+    SSM_DBNAME_PATH: ${file(./yml/referenceVariable.yml):DBnameParameterRef.Name}
+  deploymentBucket:
+    name: ${file(./yml/referenceVariable.yml):ServerlessDeploymentBucketName}
+
+functions: ${file(./yml/functions.yml):functions}
+
+resources:
+  Resources:
+    getTrackersRole: ${file(./yml/roles.yml):getTrackersRole}
+
+  Outputs:
+    ServiceName:
+      Description: "Service name"
+      Value: '${self:custom.servicename}'
